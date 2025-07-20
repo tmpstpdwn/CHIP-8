@@ -1,6 +1,10 @@
+/* [[INCLUDES]] */
+
 #include "chip8.h"
 #include "renderer.h"
 #include <stdio.h>
+
+/* [[MAIN]] */
 
 int main(int argc, char *argv[]) {
   if (--argc == 0) {
@@ -21,3 +25,5 @@ int main(int argc, char *argv[]) {
 
   return 0;
 }
+
+/* [[END]] */

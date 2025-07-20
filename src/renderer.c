@@ -1,7 +1,11 @@
+/* [[INCLUDES]] */
+
 #include "chip8.h"
 #include "renderer.h"
 #include <raylib.h>
 #include <stdint.h>
+
+/* [[VAR DCL - DEF]] */
 
 static const int screen_width = VIDEO_WIDTH * SCALE;
 static const int screen_height = VIDEO_HEIGHT * SCALE;
@@ -25,6 +29,14 @@ static const int key_map[16] = {
     KEY_F,     // E
     KEY_V      // F
 };
+
+/* [[FN DCL]] */
+
+void renderer_init(void);
+void renderer_draw(const uint8_t *video);
+int renderer_input(uint8_t *keypad);
+
+/* [[FN DEF]] */
 
 void renderer_init(void) {
   InitWindow(screen_width, screen_height, title);
@@ -55,3 +67,5 @@ int renderer_input(uint8_t *keypad) {
   }
   return 1;
 }
+
+/* [[END]] */

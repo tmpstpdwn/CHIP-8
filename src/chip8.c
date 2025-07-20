@@ -6,7 +6,7 @@
 #include <string.h>
 #include "chip8.h"
 
-/* [[VAR DCL]] */
+/* [[VAR DCL - DEF]] */
 
 // CHIP-8 internals
 uint8_t video[VIDEO_HEIGHT * VIDEO_WIDTH];
