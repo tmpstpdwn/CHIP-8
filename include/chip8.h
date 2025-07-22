@@ -15,6 +15,12 @@
 #define START_ADDRESS 0x200
 #define FONTSET_START_ADDRESS 0x50
 
+#define T_MAX 0xF  
+#define T0_MAX 0xE  
+#define T8_MAX 0xE 
+#define TE_MAX 0xE
+#define TF_MAX 0x65
+
 // Vars
 extern uint8_t video[VIDEO_HEIGHT * VIDEO_WIDTH];
 extern uint8_t keypad[16];

@@ -23,11 +23,11 @@ static uint8_t sound_timer;
 static uint16_t opcode;
 
 // Fn tables
-static chip8_fn table[0xF + 1];
-static chip8_fn table0[0xE + 1];
-static chip8_fn table8[0xE + 1];
-static chip8_fn tableE[0xE + 1];
-static chip8_fn tableF[0x65 + 1];
+static chip8_fn table[T_MAX + 1];
+static chip8_fn table0[T0_MAX + 1];
+static chip8_fn table8[T8_MAX + 1];
+static chip8_fn tableE[TE_MAX + 1];
+static chip8_fn tableF[TF_MAX + 1];
 
 // Fontset
 static uint8_t fontset[FONTSET_SIZE] = {
@@ -167,19 +167,43 @@ void setup_tables(void) {
 }
 
 void table0_fn(void) {
-  table0[opcode & 0x000Fu]();
+  uint8_t index = opcode & 0x000Fu;
+  if (index <= T0_MAX) {
+    table0[index]();
+  } else {
+    fprintf(stderr, "Error: Unknown 0x0 opcode: 0x%X\n", opcode);
+    exit(1);
+  }
 }
 
 void table8_fn(void) {
-  table8[opcode & 0x000Fu]();
+  uint8_t index = opcode & 0x000Fu;
+  if (index <= T8_MAX) {
+    table8[index]();
+  } else {
+    fprintf(stderr, "Error: Unknown 0x8 opcode: 0x%X\n", opcode);
+    exit(1);
+  }
 }
 
 void tableE_fn(void) {
-  tableE[opcode & 0x000Fu]();
+  uint8_t index = opcode & 0x000Fu;
+  if (index <= TE_MAX) {
+    tableE[index]();
+  } else {
+    fprintf(stderr, "Error: Unknown 0xE opcode: 0x%X\n", opcode);
+    exit(1);
+  }
 }
 
 void tableF_fn(void) {
-  tableF[opcode & 0x00FFu]();
+  uint8_t index = opcode & 0x00FFu;
+  if (index <= TF_MAX) {
+    tableF[index]();
+  } else {
+    fprintf(stderr, "Error: Unknown 0xF opcode: 0x%X\n", opcode);
+    exit(1);
+  }
 }
 
 void load_rom(const char *file_name) {
@@ -187,7 +211,7 @@ void load_rom(const char *file_name) {
 
   FILE *file = fopen(file_name, "rb");
   if (file == NULL) {
-    perror("Error opening file");
+    perror("Error opening rom!");
     exit(1);
   }
 
@@ -219,6 +243,10 @@ void OP_00E0(void) {
 }
 
 void OP_00EE(void) {
+  if (sp <= 0) {
+    fprintf(stderr, "Error: Stack underflow!\n");
+    exit(1);
+  }
   sp--;
   pc = stack[sp];
 }
@@ -228,8 +256,11 @@ void OP_1NNN(void) {
 }
 
 void OP_2NNN(void) {
-  stack[sp] = pc;
-  sp++;
+  if (sp >= 16) {
+    fprintf(stderr, "Error: Stack overflow!\n");
+    exit(1);
+  }
+  stack[sp++] = pc;
   pc = opcode & 0x0FFFu;
 }
 
@@ -323,8 +354,9 @@ void OP_8XY5(void) {
 
 void OP_8XY6(void) {
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-  registers[0xF] = (registers[Vx] & 0x1u);
-  registers[Vx] >>= 1;
+  uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+  registers[0xF] = registers[Vy] & 0x1u;
+  registers[Vx] = registers[Vy] >> 1;
 }
 
 void OP_8XY7(void) {
@@ -342,8 +374,9 @@ void OP_8XY7(void) {
 
 void OP_8XYE(void) {
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-  registers[0xF] = (registers[Vx] & 0x80u) >> 7u;
-  registers[Vx] <<= 1;
+  uint8_t Vy = (opcode & 0x00F0u) >> 4u;
+  registers[0xF] = (registers[Vy] & 0x80u) >> 7u;
+  registers[Vx] = registers[Vy] << 1;
 }
 
 void OP_9XY0(void) {
@@ -385,7 +418,10 @@ void OP_DXYN(void) {
 
     for (unsigned int col = 0; col < 8; col++) {
       uint8_t sprite_pixel = sprite_byte & (0x80u >> col);
-      uint8_t *screen_pixel = &video[(y_pos + row) * VIDEO_WIDTH + (x_pos + col)];
+
+      uint8_t x_coord = (x_pos + col) % VIDEO_WIDTH;
+      uint8_t y_coord = (y_pos + row) % VIDEO_HEIGHT;
+      uint8_t *screen_pixel = &video[y_coord * VIDEO_WIDTH + x_coord];
 
       if (sprite_pixel) {
         if (*screen_pixel) {
@@ -421,42 +457,14 @@ void OP_FX07(void) {
 
 void OP_FX0A(void) {
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-
-  if (keypad[0]) {
-    registers[Vx] = 0;
-  } else if (keypad[1]) {
-    registers[Vx] = 1;
-  } else if (keypad[2]) {
-    registers[Vx] = 2;
-  } else if (keypad[3]) {
-    registers[Vx] = 3;
-  } else if (keypad[4]) {
-    registers[Vx] = 4;
-  } else if (keypad[5]) {
-    registers[Vx] = 5;
-  } else if (keypad[6]) {
-    registers[Vx] = 6;
-  } else if (keypad[7]) {
-    registers[Vx] = 7;
-  } else if (keypad[8]) {
-    registers[Vx] = 8;
-  } else if (keypad[9]) {
-    registers[Vx] = 9;
-  } else if (keypad[10]) {
-    registers[Vx] = 10;
-  } else if (keypad[11]) {
-    registers[Vx] = 11;
-  } else if (keypad[12]) {
-    registers[Vx] = 12;
-  } else if (keypad[13]) {
-    registers[Vx] = 13;
-  } else if (keypad[14]) {
-    registers[Vx] = 14;
-  } else if (keypad[15]) {
-    registers[Vx] = 15;
-  } else {
-    pc -= 2;
+  for (uint8_t i = 0; i < 16; i++) {
+    if (keypad[i]) {
+      registers[Vx] = i;
+      return;
+    }
   }
+
+  pc -= 2;
 }
 
 void OP_FX15(void) {
@@ -496,14 +504,14 @@ void OP_FX33(void) {
 
 void OP_FX55(void) {
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-  for (uint8_t i = 0; i < Vx; i++) {
+  for (uint8_t i = 0; i <= Vx; i++) {
     memory[index_ + i] = registers[i];
   }
 }
 
 void OP_FX65(void) {
   uint8_t Vx = (opcode & 0x0F00u) >> 8u;
-  for (uint8_t i = 0; i < Vx; i++) {
+  for (uint8_t i = 0; i <= Vx; i++) {
     registers[i] = memory[index_ + i];
   }
 }
@@ -518,17 +526,14 @@ void chip8_init(const char *file_name) {
 void chip8_cycle(void) {
   opcode = (memory[pc] << 8u) | memory[pc + 1];
 
+  printf("PC: %X OP %X\n", pc, opcode);
+
   pc += 2;
-  
+
   table[(opcode & 0xF000u) >> 12u]();
 
-  if (delay_timer > 0) {
-    delay_timer--;
-  }
-
-  if (sound_timer > 0) {
-    sound_timer--;
-  }
+  if (delay_timer > 0) delay_timer--;
+  if (sound_timer > 0) sound_timer--;
 }
 
 /* [[END]] */
