@@ -2,7 +2,7 @@
 
 A simple, functional CHIP-8 emulator written by me as a learning project. It supports most CHIP-8 programs.
 
-> ⚠️ **Note**: This emulator does **not** support sound output.
+> ⚠️ **Note**: This is a standard CHIP-8 implementation and does not support SUPER-CHIP or XO-CHIP ROMS!!!.
 
 ---
 
@@ -69,12 +69,14 @@ You can find public domain CHIP-8 ROMs [here](https://github.com/dmatlack/chip8/
 
 ---
 
+## Resources used
+
+- [Building a CHIP-8 Emulator [C++]](https://austinmorlan.com/posts/chip8_emulator/) by [Austin Morlan](https://austinmorlan.com/).
+- [Chip-8 test suite](https://github.com/Timendus/chip8-test-suite/tree/main).
+- [Chip-8 opcode table](https://chip8.gulrak.net/).
+
 ## License
 
 MIT License — free to use, modify, and distribute.
 
 ---
-
-## Credits
-
-- Based on [this tutorial](https://austinmorlan.com/posts/chip8_emulator/) by [Austin Morlan](https://austinmorlan.com/)
