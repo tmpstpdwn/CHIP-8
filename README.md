@@ -3,8 +3,8 @@
 A simple, functional CHIP-8 emulator written by me as a learning project. It supports most CHIP-8 programs.
 
 > ⚠️ **Note**:
-> - This is a standard CHIP-8 implementation and does not support SUPER-CHIP or XO-CHIP ROMS!!!.
-> - This implementation doesnt support sounds.
+> - This is strictly a standard CHIP-8 implementation.
+> - This implementation does not support audio output.
 
 ---
 
